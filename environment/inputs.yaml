@@ -1,8 +1,0 @@
-dbname: petclinic
-mysql_root_password: orie9ahc7N
-mysql_user: pc
-mysql_password: ahyeeVaib4
-docker_registry_user: admin
-docker_registry_password: yaeCh3kieb
-docker_registry_hostname: ec2-52-43-253-150.us-west-2.compute.amazonaws.com
-docker_repo_url: ec2-52-43-253-150.us-west-2.compute.amazonaws.com:5000/petclinix-master/gd/petclinic
