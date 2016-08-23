@@ -1,0 +1,151 @@
+---
+- hosts: tag_role_gitlab
+  remote_user: centos
+  become: true
+  vars_prompt:
+   - name: "project_name"
+     prompt: "Enter project name"
+  tasks:
+    - include: common.yml
+    - name: share project name
+      set_fact: project_name="{{ project_name }}"
+    - name: activate Docker
+      service: state=restarted enabled=yes name=docker
+    - name: create service directory for GitLab
+      file: path=/srv/gitlab state=directory mode=0755
+    - name: activate GitLab
+      docker_container:
+        name: gitlab
+        image: "gitlab/gitlab-ce:latest"
+        restart_policy: always
+        hostname: "{{ ec2_public_dns_name }}"
+        volumes:
+          - /srv/gitlab/config:/etc/gitlab
+          - /srv/gitlab/logs:/var/log/gitlab
+          - /srv/gitlab/data:/var/opt/gitlab
+        ports:
+          - "443:443"
+          - "80:80"
+          - "2222:22"
+        env:
+          GITLAB_ROOT_PASSWORD: "{{ gitlab_root_password }}"
+    - debug: msg="GitLab hostname is {{ ec2_public_dns_name }}, root password is {{ gitlab_root_password }}"
+    - wait_for: port=80 delay=10 timeout=1200
+    - name: "Waiting until GitLab is completely up"
+      uri:
+       url: "http://{{ ec2_public_dns_name }}/users/sign_in"
+       status_code: 200
+      register: result
+      until: result.status == 200
+      retries: 300
+      delay: 5
+    - debug: msg="GitLab is up, continuing with postconfiguration"
+    - name: postconfigure GitLab
+      script: gitlab-postconfig.sh "{{ project_name }}" "{{ gitlab_root_password }}" "{{ gitlab_public_key }}" creates=/tmp/gitlab-postconfigured
+    - name: fetch and register API access token
+      shell: cat /tmp/gitlab-postconfigured
+      register: gitlab_access_token_shobj
+    - name: fetch and register user access token
+      shell: cat /tmp/gitlab-postconfigured-usertoken
+      register: gitlab_user_token_shobj
+
+- hosts: tag_role_docker
+  remote_user: centos
+  become: true
+  tasks:
+    - include: common.yml
+    - name: activate Docker
+      service: state=restarted enabled=yes name=docker
+    - name: prepare key storage
+      file: path=/tmp/{{ item }} state=directory mode=0755
+      with_items:
+        - auth
+        - certs
+    - name: prepare access keys
+      shell: openssl req -newkey rsa:4096 -nodes -sha256 -keyout /tmp/certs/domain.key -x509 -days 365 -out /tmp/certs/domain.crt -subj "/C=UA/CN={{ ec2_public_dns_name }}"
+      args:
+        creates: /tmp/certs/domain.key
+    - name: generate registry credentials file
+      shell: docker run --name docker-registry-auth --entrypoint htpasswd registry:2 -Bbn admin {{ docker_admin_password }} > /tmp/auth/htpasswd && docker stop docker-registry-auth
+      args:
+        creates: /tmp/auth/htpasswd
+    - name: activate the registry
+      docker_container:
+        name: docker-registry
+        image: "registry:2"
+        restart_policy: always
+        hostname: "{{ ec2_public_dns_name }}"
+        volumes:
+          - /tmp/auth:/auth
+          - /tmp/certs:/certs
+        ports:
+          - "5000:5000"
+          - "2222:22"
+        env:
+          REGISTRY_AUTH: "htpasswd"
+          REGISTRY_AUTH_HTPASSWD_REALM: "Registry Realm"
+          REGISTRY_AUTH_HTPASSWD_PATH: "/auth/htpasswd"
+          REGISTRY_HTTP_TLS_CERTIFICATE: "/certs/domain.crt"
+          REGISTRY_HTTP_TLS_KEY: "/certs/domain.key"
+    - debug: msg="Docker registry hostname is {{ ec2_public_dns_name }}, admin password is {{ docker_admin_password }}"
+    - wait_for: port=5000 delay=10 timeout=1200
+    - debug: msg="Docker registry is up"
+    
+- hosts: tag_role_jenkins
+  remote_user: centos
+  become: true
+  vars:
+    gitlab_url: "http://{{ hostvars[groups['tag_role_gitlab'][0]]['ec2_public_dns_name'] }}/"
+    gitlab_endpoint: "ssh://git@{{ hostvars[groups['tag_role_gitlab'][0]]['ec2_public_dns_name'] }}:2222/root/{{ hostvars[groups['tag_role_gitlab'][0]]['project_name'] }}.git"
+    gitlab_api_token: "{{ hostvars[groups['tag_role_gitlab'][0]].gitlab_access_token_shobj.stdout }}"
+    gitlab_user_token: "{{ hostvars[groups['tag_role_gitlab'][0]].gitlab_user_token_shobj.stdout }}"
+    project_name: "{{ hostvars[groups['tag_role_gitlab'][0]]['project_name'] }}"
+    docker_repo_user: "admin"
+    docker_registry_hostname: "{{ hostvars[groups['tag_role_docker'][0]]['ec2_public_dns_name'] }}"
+    docker_master_repo_url: "{{ hostvars[groups['tag_role_docker'][0]]['ec2_public_dns_name'] }}:5000/{{ hostvars[groups['tag_role_gitlab'][0]]['project_name'] }}-master"
+    docker_pr_repo_url: "{{ hostvars[groups['tag_role_docker'][0]]['ec2_public_dns_name'] }}:5000/{{ hostvars[groups['tag_role_gitlab'][0]]['project_name'] }}-pr"
+  tasks:
+    - include: common.yml
+#    - debug: msg={{hostvars}}
+    - name: prepare service overlay directory for Docker
+      file: path=/etc/systemd/system/docker.service.d state=directory mode=0755
+    - name: prepare service overlay for Docker
+      template: src=jenkins-conf/overlay.conf dest=/etc/systemd/system/docker.service.d/overlay.conf force=yes
+    - name: prepare service directory for Jenkins container
+      file: path=/srv/jenkins state=directory mode=0755 owner=root
+    - name: prepare init.groovy
+      template: src=jenkins-conf/init.groovy dest=/srv/jenkins/init.groovy force=yes
+    - name: prepare Jenkins post-init directory
+      file: path=/srv/jenkins/init.groovy.d state=directory mode=0755 owner=root
+    - name: prepare Jenkins init script
+      template: src=jenkins-conf/init.groovy dest=/srv/jenkins/init.groovy force=yes
+    - name: prepare Jenkins postinit script
+      template: src=jenkins-conf/postinit.groovy dest=/srv/jenkins/init.groovy.d/postinit.groovy force=yes
+    - name: prepare Jenkins jobs
+      template: src=jenkins-conf/jobs.groovy dest=/srv/jenkins/jobs.groovy force=yes
+    - name: prepare Jenkins failure handler
+      template: src=jenkins-conf/boot-failure.groovy dest=/srv/jenkins/boot-failure.groovy force=yes
+    - name: activate Docker
+      service: state=started enabled=yes name=docker
+    - name: run Jenkins
+      docker_container:
+        name: jenkins
+        image: "jenkins:1.651.3-alpine"
+        restart_policy: always
+        hostname: "{{ ec2_public_dns_name }}"
+        user: root
+        volumes:
+          - /srv/jenkins:/var/jenkins_home
+          - /var/run/docker.sock:/var/run/docker.sock
+          - /usr/bin/docker:/usr/bin/docker
+        ports:
+          - "50000:5000"
+          - "80:8080"
+          - "2222:22"
+        env:
+          JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
+    - debug: msg="Jenkins hostname is {{ ec2_public_dns_name }}, admin password is {{ jenkins_admin_password }}"
+    - wait_for: port=80 delay=10 timeout=1200
+    - debug: msg="Jenkins is up"
+    - name: setup Jenkins-to-GitLab hooks
+      script: jenkins-conf/setup-hooks.sh "{{ project_name }}" "{{ gitlab_url }}" "{{ gitlab_api_token }}" creates=/tmp/hooks-set-up
