@@ -1,0 +1,64 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  vars:
+    key_name: "Gitlab + Jenkins + Nexus"
+    instance_type_light: t2.micro
+    instance_type_heavy: t2.medium
+    security_group: sg-4b9f0b2d
+    image: ami-d2c924b2
+    region: us-west-2
+    vpc_subnet_id: subnet-1832f040
+  tasks:
+    - name: Launch GitLab instance
+      ec2:
+        key_name: "{{ key_name }}"
+        group_id: "{{ security_group }}"
+        instance_type: "{{ instance_type_heavy }}"
+        image: "{{ image }}"
+        wait: true
+        region: "{{ region }}"
+        vpc_subnet_id: "{{ vpc_subnet_id }}"
+        assign_public_ip: yes
+        instance_tags: 
+          role: gitlab
+          Name: GitLab
+        count_tag: 
+          role: gitlab
+        exact_count: 1
+      register: ec2
+    - name: Launch Jenkins instance
+      ec2:
+        key_name: "{{ key_name }}"
+        group_id: "{{ security_group }}"
+        instance_type: "{{ instance_type_heavy }}"
+        image: "{{ image }}"
+        wait: true
+        region: "{{ region }}"
+        vpc_subnet_id: "{{ vpc_subnet_id }}"
+        assign_public_ip: yes
+        instance_tags: 
+          role: jenkins
+          Name: Jenkins
+        count_tag: 
+          role: jenkins
+        exact_count: 1
+      register: ec2
+    - name: Launch Docker Registry instance
+      ec2:
+        key_name: "{{ key_name }}"
+        group_id: "{{ security_group }}"
+        instance_type: "{{ instance_type_light }}"
+        image: "{{ image }}"
+        wait: true
+        region: "{{ region }}"
+        vpc_subnet_id: "{{ vpc_subnet_id }}"
+        assign_public_ip: yes
+        instance_tags: 
+          role: docker
+          Name: Docker Registry
+        count_tag: 
+          role: docker
+        exact_count: 1
+      register: ec2

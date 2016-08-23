@@ -1,0 +1,67 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    key_name: "Gitlab + Jenkins + Nexus"
+    instance_type_light: t2.micro
+    instance_type_heavy: t2.small
+    security_group: sg-4b9f0b2d
+    image: ami-d2c924b2
+    region: us-west-2
+    vpc_subnet_id: subnet-1832f040
+  tasks:
+    - name: Teardown HAProxy instance
+      ec2:
+        key_name: "{{ key_name }}"
+        group_id: "{{ security_group }}"
+        instance_type: "{{ instance_type_light }}"
+        image: "{{ image }}"
+        wait: false
+        region: "{{ region }}"
+        vpc_subnet_id: "{{ vpc_subnet_id }}"
+        assign_public_ip: yes
+        instance_tags: 
+          type: environment
+          role: haproxy
+          Name: HAProxy
+        count_tag: 
+          role: haproxy
+        exact_count: 0
+      register: ec2
+    - name: Teardown MySQL instance
+      ec2:
+        key_name: "{{ key_name }}"
+        group_id: "{{ security_group }}"
+        instance_type: "{{ instance_type_light }}"
+        image: "{{ image }}"
+        wait: false
+        region: "{{ region }}"
+        vpc_subnet_id: "{{ vpc_subnet_id }}"
+        assign_public_ip: yes
+        instance_tags: 
+          type: environment
+          role: mysql
+          Name: MySQL
+        count_tag: 
+          role: mysql
+        exact_count: 0
+      register: ec2
+    - name: Teardown Tomcat instances
+      ec2:
+        key_name: "{{ key_name }}"
+        group_id: "{{ security_group }}"
+        instance_type: "{{ instance_type_heavy }}"
+        image: "{{ image }}"
+        wait: false
+        region: "{{ region }}"
+        vpc_subnet_id: "{{ vpc_subnet_id }}"
+        assign_public_ip: yes
+        instance_tags: 
+          type: environment
+          role: tomcat
+          Name: Tomcat-Instance
+        count_tag:
+          role: tomcat
+        exact_count: 0
+      register: ec2

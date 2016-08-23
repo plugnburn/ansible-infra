@@ -1,0 +1,24 @@
+- name: set hostname
+  shell: 'hostname `curl -s http://169.254.169.254/latest/meta-data/public-hostname` && echo "`hostname -i` `hostname`" >> /etc/hosts && touch /tmp/host-created'
+  args:
+    creates: /tmp/host-created
+- name: turn off selinux
+  shell: "selinuxenabled && setenforce 0 && touch /tmp/selinux-disabled"
+  args:
+    creates: /tmp/selinux-disabled
+- name: flush iptables
+  shell: "iptables -F && iptables -X && touch /tmp/iptables-flushed"
+  args:
+    creates: /tmp/iptables-flushed
+- name: prepare package manager
+  yum: name=* state=latest update_cache=yes
+- name: prepare devtools
+  yum: name="@Development tools" state=present
+- name: prepare epel repo
+  yum: name="epel-release" state=present
+- name: install prerequisites
+  yum: name="wget,pwgen,device-mapper-event-libs,python-pip,python-virtualenv" state=present
+- name: install Docker
+  yum: name=https://yum.dockerproject.org/repo/main/centos/7/Packages/docker-engine-1.12.0-1.el7.centos.x86_64.rpm,https://yum.dockerproject.org/repo/main/centos/7/Packages/docker-engine-selinux-1.12.0-1.el7.centos.noarch.rpm state=present
+- name: install Docker-Py
+  pip: name=docker-py
