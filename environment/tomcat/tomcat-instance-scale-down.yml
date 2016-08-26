@@ -29,5 +29,5 @@
           role: tomcat
         exact_count: "{{ backends }}"
       register: ec2
-- meta: refresh_inventory
+    - meta: refresh_inventory
 - include: tomcat-scale-finish.yml
