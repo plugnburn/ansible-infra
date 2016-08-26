@@ -34,5 +34,6 @@
       with_items: '{{ec2.instances}}'
     - debug: msg="Instance {{ item.public_ip }} is up"
       with_items: '{{ec2.instances}}'
+    - shell: ./ec2.py --refresh-cache
     - meta: refresh_inventory
 - include: tomcat-scale-up.yml
