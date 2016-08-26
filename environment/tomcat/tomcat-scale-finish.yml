@@ -2,6 +2,7 @@
 - hosts: tag_role_haproxy
   remote_user: centos
   become: true
+  ignore_errors: yes
   tasks:
     - name: recreate HAProxy config
       template: src=../configs/haproxy.cfg dest=/tmp/haproxy.cfg force=yes
