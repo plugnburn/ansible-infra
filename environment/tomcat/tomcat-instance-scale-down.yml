@@ -17,7 +17,7 @@
         group_id: "{{ security_group }}"
         instance_type: "{{ instance_type_heavy }}"
         image: "{{ image }}"
-        wait: false
+        wait: true
         region: "{{ region }}"
         vpc_subnet_id: "{{ vpc_subnet_id }}"
         assign_public_ip: yes
