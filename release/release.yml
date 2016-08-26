@@ -2,9 +2,6 @@
 - hosts: tag_role_gitlab
   remote_user: centos
   become: true
-  vars_prompt:
-   - name: "project_name"
-     prompt: "Enter project name"
   tasks:
     - include: common.yml
     - name: share project name
