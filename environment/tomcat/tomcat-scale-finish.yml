@@ -2,9 +2,9 @@
 - hosts: tag_role_haproxy
   remote_user: centos
   become: true
-  ignore_errors: yes
   tasks:
     - name: recreate HAProxy config
+      ignore_errors: yes
       template: src=../configs/haproxy.cfg dest=/tmp/haproxy.cfg force=yes
     - name: activate HAProxy
       docker_container:
