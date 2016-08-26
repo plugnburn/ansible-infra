@@ -4,6 +4,8 @@
   ignore_errors: yes
   become: true
   tasks:
+    - name: refresh inventory
+      meta: refresh_inventory
     - name: recreate HAProxy config
       template: src=../configs/haproxy.cfg dest=/tmp/haproxy.cfg force=yes
     - name: activate HAProxy
