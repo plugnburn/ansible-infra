@@ -1,6 +1,7 @@
 ---
 - hosts: localhost
   connection: local
+  become: no
   gather_facts: true
   vars:
     key_name: "Gitlab + Jenkins + Nexus"
