@@ -1,5 +1,6 @@
---- 
+---
 - include: tomcat-instance-scale-up.yml
+---
 - hosts: tag_role_tomcat
   remote_user: centos
   become: true
