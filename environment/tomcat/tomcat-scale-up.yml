@@ -1,11 +1,11 @@
 --- 
+- include: tomcat-instance-scale-up.yml
 - hosts: tag_role_tomcat
   remote_user: centos
   become: true
   vars:
     mysql_host: "{{ hostvars[groups['tag_role_mysql'][0]]['ec2_public_dns_name'] }}"
   tasks:
-    - local_action: include tomcat-scale-up.yml
     - include: ../common.yml
     - name: prepare service overlay directory for Docker
       file: path=/etc/systemd/system/docker.service.d state=directory mode=0755
