@@ -30,4 +30,4 @@
         exact_count: "{{ backends }}"
       register: ec2
     - meta: refresh_inventory
-    - local_action: shell curl --data "host_config_key=7240d10c262204a7200f2deff46ea301" "https://localhost:443/api/v1/job_templates/87/callback/"
+    - local_action: shell curl -k --data "host_config_key=7240d10c262204a7200f2deff46ea301" "https://localhost:443/api/v1/job_templates/87/callback/"
