@@ -39,4 +39,4 @@
     - add_host: name="{{ item.public_ip }}" group='tag_role_tomcat'
       with_items: '{{ec2.instances}}'
     - add_host: name=localhost
-    - local_action: shell /usr/share/awx/request_tower_configuration.sh 7240d10c262204a7200f2deff46ea301 87
+    - local_action: shell localhost /usr/share/awx/request_tower_configuration.sh 7240d10c262204a7200f2deff46ea301 87
