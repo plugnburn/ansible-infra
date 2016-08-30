@@ -31,4 +31,4 @@
       register: ec2
     - meta: refresh_inventory
     - add_host: name=localhost
-    - local_action: shell /usr/share/awx/request_tower_configuration.sh localhost 7240d10c262204a7200f2deff46ea301 87
+    - local_action: shell bash /usr/share/awx/request_tower_configuration.sh localhost 7240d10c262204a7200f2deff46ea301 87
