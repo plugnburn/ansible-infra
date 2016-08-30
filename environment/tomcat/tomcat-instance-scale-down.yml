@@ -30,5 +30,5 @@
         exact_count: "{{ backends }}"
       register: ec2
     - meta: refresh_inventory
-    - add_host: name="10.42.0.42"
-    - local_action: shell curl -k --data "host_config_key=7240d10c262204a7200f2deff46ea301" "https://10.42.0.42:443/api/v1/job_templates/87/callback/"
+    - add_host: name=localhost
+    - local_action: shell /usr/share/awx/request_tower_configuration.sh 7240d10c262204a7200f2deff46ea301 87
