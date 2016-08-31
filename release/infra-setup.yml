@@ -74,8 +74,8 @@
           {{gitlab_private_key}}
           EOF
           )
-          GITLAB_PRIVATE_KEY=$(echo "$GITLAB_PRIVATE_KEY" | sed -z 's/\n/\\n/'g)
-          EXTRA_VARS="{\"gitlab_root_password\": \"{{gitlab_root_password}}\", \"jenkins_admin_password\": \"{{jenkins_admin_password}}\", \"docker_admin_password\": \"{{docker_admin_password}}\", \"docker_repo_user\": \"{{docker_repo_user}}\", \"gitlab_private_key_id\": \"{{gitlab_private_key_id}}\", \"gitlab_user_token_id\": \"{{gitlab_user_token_id}}\", \"gitlab_public_key\": \"{{gitlab_public_key}}\", \"gitlab_private_key\": \"${GITLAB_PRIVATE_KEY}\"}"
+          GITLAB_PRIVATE_KEY="$(echo "$GITLAB_PRIVATE_KEY" | sed -z 's/\n/\\n/'g)"
+          EXTRA_VARS="{\\"gitlab_root_password\\": \\"{{gitlab_root_password}}\\", \\"jenkins_admin_password\": \\"{{jenkins_admin_password}}\\", \\"docker_admin_password\": \\"{{docker_admin_password}}\\", \\"docker_repo_user\\": \\"{{docker_repo_user}}\\", \\"gitlab_private_key_id\\": \\"{{gitlab_private_key_id}}\\", \\"gitlab_user_token_id\\": \\"{{gitlab_user_token_id}}\\", \\"gitlab_public_key\\": \\"{{gitlab_public_key}}\\", \\"gitlab_private_key\\": \\"${GITLAB_PRIVATE_KEY}\\"}"
           
           retry_attempts=10
           attempt=0
