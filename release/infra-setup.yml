@@ -31,6 +31,26 @@
         count_tag: 
           role: gitlab
         exact_count: 1
+        user_data: |
+          #!/bin/bash
+          TOWER={{tower_hostname}}
+          JOB={{tower_provision_job_id}}
+          KEY={{tower_hostkey}}
+          sleep 30
+          retry_attempts=10
+          attempt=0
+          while [[ $attempt -lt $retry_attempts ]]
+          do
+             status_code=`curl -s -i -k -H "Expect:" -H "Content-type: application/json" --data "{\"host_config_key\":\"${KEY}\"}" http://${TOWER}/api/v1/job_templates/${JOB}/callback/ | head -n 1 | awk '{print $2}'`
+             if [[ $status_code == 201 ]]
+                 then
+                 exit 0
+             fi
+             attempt=$(( attempt + 1 ))
+             echo "${status_code} received... retrying in 1 minute. (Attempt ${attempt})"
+             sleep 60
+          done
+          exit 1
       register: ec2
     - name: Launch Jenkins instance
       ec2:
@@ -48,6 +68,26 @@
         count_tag: 
           role: jenkins
         exact_count: 1
+        user_data: |
+          #!/bin/bash
+          TOWER={{tower_hostname}}
+          JOB={{tower_provision_job_id}}
+          KEY={{tower_hostkey}}
+          sleep 30
+          retry_attempts=10
+          attempt=0
+          while [[ $attempt -lt $retry_attempts ]]
+          do
+             status_code=`curl -s -i -k -H "Expect:" -H "Content-type: application/json" --data "{\"host_config_key\":\"${KEY}\"}" http://${TOWER}/api/v1/job_templates/${JOB}/callback/ | head -n 1 | awk '{print $2}'`
+             if [[ $status_code == 201 ]]
+                 then
+                 exit 0
+             fi
+             attempt=$(( attempt + 1 ))
+             echo "${status_code} received... retrying in 1 minute. (Attempt ${attempt})"
+             sleep 60
+          done
+          exit 1
       register: ec2
     - name: Launch Docker Registry instance
       ec2:
