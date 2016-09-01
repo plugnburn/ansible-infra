@@ -102,6 +102,7 @@
     docker_master_repo_url: "{{ hostvars[groups['tag_role_docker'][0]]['ec2_public_dns_name'] }}:5000/{{ hostvars[groups['tag_role_gitlab'][0]]['project_name'] }}-master"
     docker_pr_repo_url: "{{ hostvars[groups['tag_role_docker'][0]]['ec2_public_dns_name'] }}:5000/{{ hostvars[groups['tag_role_gitlab'][0]]['project_name'] }}-pr"
   tasks:
+    - meta: refresh_inventory
     - include: common.yml
 #    - debug: msg={{hostvars}}
     - name: prepare service overlay directory for Docker
