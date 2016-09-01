@@ -13,7 +13,6 @@
     tower_hostname: "ec2-52-89-73-131.us-west-2.compute.amazonaws.com"
     tower_hostkey: "8013c2680a5c7d42eb3f273131581bab"
     tower_provision_job_id: 9
-    current_tower_password: ""
   tasks:
     - add_host: name="{{ tower_hostname }}"
     - name: Launch GitLab instance
