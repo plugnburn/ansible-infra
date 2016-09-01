@@ -13,6 +13,7 @@
     tower_hostname: "ec2-52-89-73-131.us-west-2.compute.amazonaws.com"
     tower_hostkey: "8013c2680a5c7d42eb3f273131581bab"
     tower_provision_job_id: 9
+    current_tower_password: ""
   tasks:
     - add_host: name="{{ tower_hostname }}"
     - name: Launch GitLab instance
@@ -78,7 +79,7 @@
           attempt=0
           while [[ $attempt -lt $retry_attempts ]]
           do
-             status_code=`curl -s -i -k -H "Expect:" -H "Content-type: application/json" --data "{\"host_config_key\":\"${KEY}\"}" http://${TOWER}/api/v1/job_templates/${JOB}/callback/ | head -n 1 | awk '{print $2}'`
+             status_code=`curl -s -i -k -H "Expect:" -H "Content-type: application/json" --user admin:{{current_tower_password}} http://${TOWER}/api/v1/job_templates/${JOB}/launch/ | head -n 1 | awk '{print $2}'`
              if [[ $status_code == 201 ]]
                  then
                  exit 0
