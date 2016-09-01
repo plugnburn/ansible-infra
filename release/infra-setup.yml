@@ -78,7 +78,7 @@
           attempt=0
           while [[ $attempt -lt $retry_attempts ]]
           do
-             status_code=`curl -s -i -k -H "Expect:" -H "Content-type: application/json" --user admin:{{current_tower_password}} http://${TOWER}/api/v1/job_templates/${JOB}/launch/ | head -n 1 | awk '{print $2}'`
+             status_code=`curl -s -i -k -XPOST -H "Expect:" -H "Content-type: application/json" --user admin:{{current_tower_password}} http://${TOWER}/api/v1/job_templates/${JOB}/launch/ | head -n 1 | awk '{print $2}'`
              if [[ $status_code == 201 ]]
                  then
                  exit 0
