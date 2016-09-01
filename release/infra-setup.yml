@@ -70,19 +70,12 @@
           TOWER={{tower_hostname}}
           JOB={{tower_provision_job_id}}
           KEY={{tower_hostkey}}
-          GITLAB_PRIVATE_KEY=$(cat <<-'EOF'
-          {{gitlab_private_key}}
-          EOF
-          )
-          GITLAB_PRIVATE_KEY="$(echo "$GITLAB_PRIVATE_KEY" | sed -z 's/\n/\\n/'g)"
-          MS='\\\"'
-          EXTRA_VARS="{${MS}gitlab_root_password${MS}: ${MS}{{gitlab_root_password}}${MS}, ${MS}jenkins_admin_password${MS}: ${MS}{{jenkins_admin_password}}${MS}, ${MS}docker_admin_password${MS}: ${MS}{{docker_admin_password}}${MS}, ${MS}docker_repo_user${MS}: ${MS}{{docker_repo_user}}${MS}, ${MS}gitlab_private_key_id${MS}: ${MS}{{gitlab_private_key_id}}${MS}, ${MS}gitlab_user_token_id${MS}: ${MS}{{gitlab_user_token_id}}${MS}, ${MS}gitlab_public_key${MS}: ${MS}{{gitlab_public_key}}${MS}, ${MS}gitlab_private_key${MS}: ${MS}${GITLAB_PRIVATE_KEY}${MS}}"
           sleep 30
           retry_attempts=10
           attempt=0
           while [[ $attempt -lt $retry_attempts ]]
           do
-             status_code=`curl -s -i -k -H "Expect:" -H "Content-type: application/json" --data "{\"host_config_key\":\"${KEY}\", \"extra_vars\":\"${EXTRA_VARS}\"}" http://${TOWER}/api/v1/job_templates/${JOB}/callback/ | head -n 1 | awk '{print $2}'`
+             status_code=`curl -s -i -k -H "Expect:" -H "Content-type: application/json" --data "{\"host_config_key\":\"${KEY}\"}" http://${TOWER}/api/v1/job_templates/${JOB}/callback/ | head -n 1 | awk '{print $2}'`
              if [[ $status_code == 201 ]]
                  then
                  exit 0
