@@ -12,6 +12,7 @@
     region: us-west-2
     vpc_subnet_id: subnet-1832f040
     haproxy_reconfiguration_job: 32
+    tomcat_reconfiguration_job: 35
   tasks:
     - name: Rescale Tomcat instances
       ec2:
@@ -41,3 +42,4 @@
       with_items: '{{ec2.instances}}'
     - add_host: name=localhost
     - local_action: 'shell curl -s -i -k -XPOST -H "Expect:" -H "Content-type: application/json" --user admin:{{current_tower_password}} http://localhost/api/v1/job_templates/{{haproxy_reconfiguration_job}}/launch/'
+    - local_action: 'shell curl -s -i -k -XPOST -H "Expect:" -H "Content-type: application/json" --user admin:{{current_tower_password}} http://localhost/api/v1/job_templates/{{tomcat_reconfiguration_job}}/launch/'
