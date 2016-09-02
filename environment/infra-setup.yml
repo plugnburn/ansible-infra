@@ -28,6 +28,10 @@
         count_tag: 
           role: haproxy
         exact_count: 1
+        volumes: 
+          - device_name: /dev/sda1
+            volume_size: 8
+            delete_on_termination: true
       register: ec2
     - name: Launch MySQL instance
       ec2:
@@ -46,6 +50,10 @@
         count_tag: 
           role: mysql
         exact_count: 1
+        volumes: 
+          - device_name: /dev/sda1
+            volume_size: 8
+            delete_on_termination: true
       register: ec2
     - name: Launch Tomcat instances
       ec2:
@@ -64,6 +72,10 @@
         count_tag:
           role: tomcat
         exact_count: 3
+        volumes: 
+          - device_name: /dev/sda1
+            volume_size: 8
+            delete_on_termination: true
       register: ec2
     - name: Wait for SSH to come up
       local_action: wait_for host="{{ item.public_ip }}" port=22 delay=5 timeout=1200
