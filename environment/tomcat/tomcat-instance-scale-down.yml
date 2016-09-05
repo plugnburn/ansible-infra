@@ -34,6 +34,7 @@
       uri:
         url: "http://{{tower_hostname}}/api/v1/job_templates/{{haproxy_reconfiguration_job}}/launch/"
         method: POST
+        force_basic_auth: yes
         user: admin
         password: "{{current_tower_password}}"
         status_code: 201
