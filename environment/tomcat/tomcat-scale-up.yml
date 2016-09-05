@@ -28,4 +28,4 @@
           JAVA_OPTS: "-Djava.security.egd=file:/dev/./urandom -DDB_TYPE=MYSQL -DDB_DRIVER=com.mysql.jdbc.Driver -DDB_SUBDIR=mysql -DDB_URL=jdbc:mysql://{{ mysql_host }}:3306/{{ dbname }}?useUnicode=true\\&characterEncoding=UTF-8 -DDB_USERNAME={{ mysql_user }} -DDB_PASSWORD={{ mysql_password }}"
     - wait_for: port=8080 delay=10 timeout=1200
     - debug: msg="Tomcat backend {{ ec2_public_dns_name }}:8080 is up"
-    - include: tomcat-scale-finish.yml
+- include: tomcat-scale-finish.yml
