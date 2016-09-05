@@ -36,6 +36,7 @@
         method: POST
         HEADER_User-Agent: "curl/7.47.0"
         HEADER_Accept: "*/*"
+        HEADER_Expect: ""
         force_basic_auth: yes
         user: admin
         password: "{{current_tower_password}}"
