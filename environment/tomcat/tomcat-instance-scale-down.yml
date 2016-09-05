@@ -30,21 +30,12 @@
           role: tomcat
         exact_count: "{{ backends }}"
       register: ec2
-    - name: prepare HAProxy reconfiguration
-      uri:
-        url: "http://{{tower_hostname}}/api/v1/job_templates/{{haproxy_reconfiguration_job}}/launch/"
-        method: GET
-        force_basic_auth: yes
-        user: admin
-        password: "{{current_tower_password}}"
-        validate_certs: no
-        follow_redirects: all
-        status_code: 200
-        body_format: json
     - name: run HAProxy reconfiguration
       uri:
         url: "http://{{tower_hostname}}/api/v1/job_templates/{{haproxy_reconfiguration_job}}/launch/"
         method: POST
+        HEADER_User-Agent: "curl/7.47.0"
+        HEADER_Accept: "*/*"
         force_basic_auth: yes
         user: admin
         password: "{{current_tower_password}}"
