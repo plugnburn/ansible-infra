@@ -32,4 +32,4 @@
       register: ec2
     - meta: refresh_inventory
     - add_host: name=localhost
-    - local_action: 'shell curl -s -i -k -XPOST -H "Expect:" -H "Content-type: application/json" --user admin:{{current_tower_password}} http://localhost/api/v1/job_templates/{{haproxy_reconfiguration_job}}/launch/'
+    - shekk: 'curl -s -i -k -XPOST -H "Expect:" -H "Content-type: application/json" --user admin:{{current_tower_password}} http://{{tower_hostname}}/api/v1/job_templates/{{haproxy_reconfiguration_job}}/launch/'
