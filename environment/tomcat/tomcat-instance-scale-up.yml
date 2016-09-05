@@ -46,8 +46,8 @@
       with_items: '{{ec2.instances}}'
     - add_host: name=localhost
     - name: send HAProxy reconfiguration command
-      local_action: command |
-        bash -c 'curl -s -i -k -XPOST -H "Expect:" -H "Content-type: application/json" --user admin:{{current_tower_password}} http://localhost/api/v1/job_templates/{{haproxy_reconfiguration_job}}/launch/'
+      local_action: shell |
+        curl -s -i -k -XPOST -H "Expect:" -H "Content-type: application/json" --user admin:{{current_tower_password}} http://localhost/api/v1/job_templates/{{haproxy_reconfiguration_job}}/launch/
     - name: send Tomcat configuration command
-      local_action: command |
-        bash -c 'curl -s -i -k -XPOST -H "Expect:" -H "Content-type: application/json" --user admin:{{current_tower_password}} http://localhost/api/v1/job_templates/{{tomcat_reconfiguration_job}}/launch/'
+      local_action: shell |
+        curl -s -i -k -XPOST -H "Expect:" -H "Content-type: application/json" --user admin:{{current_tower_password}} http://localhost/api/v1/job_templates/{{tomcat_reconfiguration_job}}/launch/
