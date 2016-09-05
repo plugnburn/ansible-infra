@@ -32,6 +32,10 @@
       register: ec2
     - meta: refresh_inventory
     - add_host: name=localhost
-    - shell: 'curl -s -i -k -XPOST -H "Expect:" -H "Content-type: application/json" --user "admin:{{current_tower_password}}" "http://{{tower_hostname}}/api/v1/job_templates/{{haproxy_reconfiguration_job}}/launch/"'
-      become: false
-      delegate_to: localhost
+    - uri:
+        url: "http://{{tower_hostname}}/api/v1/job_templates/{{haproxy_reconfiguration_job}}/launch/"
+        method: POST
+        user: admin
+        password: "{{current_tower_password}}"
+        status_code: 201
+        body_format: json
