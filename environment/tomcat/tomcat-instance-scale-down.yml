@@ -37,5 +37,7 @@
         force_basic_auth: yes
         user: admin
         password: "{{current_tower_password}}"
+        validate_certs: no
+        follow_redirects: all
         status_code: 201
         body_format: json
