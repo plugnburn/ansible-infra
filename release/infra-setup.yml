@@ -10,7 +10,7 @@
     image: ami-d2c924b2
     region: us-west-2
     vpc_subnet_id: subnet-1832f040
-    tower_hostname: "ec2-52-88-80-83.us-west-2.compute.amazonaws.com"
+    tower_hostname: "ec2-52-33-124-11.us-west-2.compute.amazonaws.com"
     tower_hostkey: "8013c2680a5c7d42eb3f273131581bab"
     tower_provision_job_id: 9
   tasks:
