@@ -35,6 +35,38 @@
           - device_name: /dev/sda1
             volume_size: 8
             delete_on_termination: true
+        user_data: |
+          #!/bin/bash
+          TOWER={{tower_hostname}}
+          JOB1={{tomcat_reconfiguration_job}}
+          JOB2={{haproxy_reconfiguration_job}}
+          sleep 30
+          retry_attempts=10
+          attempt=0
+          while [[ $attempt -lt $retry_attempts ]]
+          do
+             status_code=`curl -s -i -k -XPOST -H "Expect:" -H "Content-type: application/json" --user admin:{{current_tower_password}} http://${TOWER}/api/v1/job_templates/${JOB1}/launch/ | head -n 1 | awk '{print $2}'`
+             if [[ $status_code == 201 ]]
+                 then
+                 exit 0
+             fi
+             attempt=$(( attempt + 1 ))
+             echo "${status_code} received... retrying in 1 minute. (Attempt ${attempt})"
+             sleep 60
+          done
+          attempt=0
+          while [[ $attempt -lt $retry_attempts ]]
+          do
+             status_code=`curl -s -i -k -XPOST -H "Expect:" -H "Content-type: application/json" --user admin:{{current_tower_password}} http://${TOWER}/api/v1/job_templates/${JOB2}/launch/ | head -n 1 | awk '{print $2}'`
+             if [[ $status_code == 201 ]]
+                 then
+                 exit 0
+             fi
+             attempt=$(( attempt + 1 ))
+             echo "${status_code} received... retrying in 1 minute. (Attempt ${attempt})"
+             sleep 60
+          done
+          exit 1
       register: ec2
     - name: Wait for SSH to come up
       local_action: wait_for host="{{ item.public_ip }}" port=22 delay=5 timeout=1200
